@@ -1,3 +1,4 @@
 *.smx
 /include/
 chat-processor.sp
+oldignore.sp
