@@ -73,6 +73,10 @@ void ToggleIgnoreArray(int client, int target, int ignoreType)
 {
     char TargName[128];
     GetClientName(target, TargName, MAXLENGTH_NAME);
+    if (client == target)
+    {
+        return;
+    }
     if (ignoreType == 1)
     {
         a_bIgnoreStatusVoice[client][target] = !a_bIgnoreStatusVoice[client][target];
