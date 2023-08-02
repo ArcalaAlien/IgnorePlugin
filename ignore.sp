@@ -90,80 +90,41 @@ void ToggleIgnoreArray(int client, int target, int ignoreType)
             PrintToChat(client, "[Ignore] Successfully unignored %s's voice chat.", TargName);
             SetListenOverride(client, target, Listen_Default);
         }
-
     }
-    // else if (ignoreType == 2)
-    // {
-    //     a_bIgnoreStatusChat[client][target] = !a_bIgnoreStatusChat[client][target];
-    //     if (a_bIgnoreStatusChat[client][target])
-    //     {
-    //         PrintToChat(client, "[Ignore] Successfuly ignored %s's text chat", TargName);
-    //     }
-    //     else
-    //     {
-    //         PrintToChat(client, "[Ignore] Succesfully unignored %s's text chat", TargName);
-    //     } 
-    // }
-    // else if (ignoreType == 3)
-    // {
-    //     a_bIgnoreStatusVoice[client][target] = !a_bIgnoreStatusVoice[client][target];
-    //     if (a_bIgnoreStatusVoice[client][target])
-    //     {
-    //         PrintToChat(client, "[Ignore] Successfully ignored %s's voice chat.", TargName);
-    //         SetListenOverride(client, target, Listen_No);
-    //     }
-    //     else
-    //     {
-    //         PrintToChat(client, "[Ignore] Successfully unignored %s's voice chat.", TargName);
-    //         SetListenOverride(client, target, Listen_Default);
-    //     }
-    //     a_bIgnoreStatusChat[client][target] = !a_bIgnoreStatusChat[client][target];
-    //     if (a_bIgnoreStatusChat[client][target])
-    //     {
-    //         PrintToChat(client, "[Ignore] Successfuly ignored %s's text chat", TargName);
-    //     }
-    //     else
-    //     {
-    //         PrintToChat(client, "[Ignore] Succesfully unignored %s's text chat", TargName);
-    //     }
-    // }
     else
     {
         PrintToChat(client, "[Ignore] Usage: !ignore <name> | Toggles ignoring user's voice chat, use @all to target all players.");
     }
 }
 
-public Action:CP_OnChatMessage(int &author, ArrayList recipients, char[] flagstring, char[] name, char[] message, bool &processcolors, bool &removecolors)
-{
-    if (g_bisEnabled)
-    {
-        if ((author < 0) || (author > MaxClients))
-        {
-            LogError("[Ignore] Warning: author is out of bounds: %d", author);
-            return Plugin_Continue;
-        }
+// public Action:CP_OnChatMessage(int &author, ArrayList recipients, char[] flagstring, char[] name, char[] message, bool &processcolors, bool &removecolors)
+// {
+//     if (g_bisEnabled)
+//     {
+//         if ((author < 0) || (author > MaxClients))
+//         {
+//             LogError("[Ignore] Warning: author is out of bounds: %d", author);
+//             return Plugin_Continue;
+//         }
 
-        for(int i = 0; i < GetArraySize(recipients); i++)
-        {
-            int client = recipients.Get(i);
-            PrintToServer("%i", client);
-            PrintToServer("%i", author);
-            if(a_bIgnoreStatusChat[client][author])
-            {
-                //PrintToServer("Recipient needs to be removed");
-                RemoveFromArray(recipients, i);
-            }
-        }
-        return Plugin_Continue;
-    }
-    return Plugin_Stop;
-}
+//         for(int i = 0; i < GetArraySize(recipients); i++)
+//         {
+//             int client = recipients.Get(i);
+//             if(a_bIgnoreStatusChat[client][author])
+//             {
+//                 recipients.Erase(client);
+//             }
+//         }
+//         return Plugin_Continue;
+//     }
+//     return Plugin_Stop;
+// }
 
 public Action:ToggleIgnore(int client, int args)
 {
     if (g_bisEnabled)
     {
-        if (args == 0 || args > 2)
+        if (args == 0 || args > 1)
         {
             ReplyToCommand(client, "[Ignore] Usage: !ignore <name> | Toggles ignoring user's voice chat, use @all to target all players.");
             return Plugin_Handled;
@@ -179,66 +140,21 @@ public Action:ToggleIgnore(int client, int args)
             ReplyToTargetError(client, tempProcessStringBuffer);
             return Plugin_Handled;
         }
-        if (args == 1 && !b_TargetAll)
+        if (b_TargetAll)
+        {
+            for (int i = 1; i < (MAXPLAYERS + 1); i++)
+            {
+                ToggleIgnoreArray(client, i, 1);
+            }
+            return Plugin_Handled;
+        }
+        else
         {
             for (int i = 0; i < tempProcessStringBuffer; i++)
             {
                 ToggleIgnoreArray(client, tempTargArray[i], 1);
             }
             return Plugin_Handled;
-        }
-        else if (args == 1 && b_TargetAll)
-        {
-            for (int i = 1; i < (MAXPLAYERS + 1); i++)
-            {
-                ToggleIgnoreArray(client, i, 1);
-            }
-        }
-        char ignoreTypeString[16];
-        GetCmdArg(2, ignoreTypeString, 16);
-        if (b_TargetAll)
-        {
-            for (int i = 1; i < (MAXPLAYERS + 1); i++)
-            {
-                if (strcmp(ignoreTypeString, "voice", false) == 0)
-                {
-                    ToggleIgnoreArray(client, i, 1);
-                }
-                else if (strcmp(ignoreTypeString, "chat", false) == 0)
-                {
-                    ToggleIgnoreArray(client, i, 2);
-                }
-                else if (strcmp(ignoreTypeString, "both", false) == 0)
-                {
-                    ToggleIgnoreArray(client, i, 3);
-                }
-                else
-                {
-                    ToggleIgnoreArray(client, i, 0);
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < tempProcessStringBuffer; i++)
-            {
-                if (strcmp(ignoreTypeString, "voice", false) == 0)
-                {
-                    ToggleIgnoreArray(client, tempTargArray[i], 1);
-                }
-                else if (strcmp(ignoreTypeString, "chat", false) == 0)
-                {
-                    ToggleIgnoreArray(client, tempTargArray[i], 2);
-                }
-                else if (strcmp(ignoreTypeString, "both", false) == 0)
-                {
-                    ToggleIgnoreArray(client, tempTargArray[i], 3);
-                }
-                else
-                {
-                    ToggleIgnoreArray(client, tempTargArray[i], 0);
-                }
-            }
         }
     }
 }
