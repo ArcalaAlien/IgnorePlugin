@@ -24,13 +24,6 @@ bool a_bIgnoreStatusVoice[MAXPLAYERS + 1][MAXPLAYERS + 1];
 bool a_bIgnoreStatusChat[MAXPLAYERS + 1][MAXPLAYERS + 1];
 bool g_bisEnabled;
 
-char tempArg[MAXLENGTH_NAME];
-int tempTargArray[MAXPLAYERS + 1];
-int tempProcessStringBuffer;
-char tempTargName[MAXLENGTH_NAME];
-bool tempStringIsML;
-bool b_TargetAll = false;
-
 public void OnPluginStart()
 {
     RegConsoleCmd("sm_ignore", ToggleIgnore, "Usage: !ignore <name> | Toggles ignoring user's voice chat, use @all to target all players.");
@@ -122,14 +115,22 @@ void ToggleIgnoreArray(int client, int target, int ignoreType)
 
 public Action:ToggleIgnore(int client, int args)
 {
+    
     if (g_bisEnabled)
     {
+        char tempArg[MAXLENGTH_NAME];
+        int tempTargArray[MAXPLAYERS + 1];
+        int tempProcessStringBuffer;
+        char tempTargName[MAXLENGTH_NAME];
+        bool tempStringIsML;
+        bool b_TargetAll = false;
         if (args == 0 || args > 1)
         {
             ReplyToCommand(client, "[Ignore] Usage: !ignore <name> | Toggles ignoring user's voice chat, use @all to target all players.");
             return Plugin_Handled;
         }
-        GetCmdArg(1, tempArg, MAXLENGTH_NAME);
+        GetCmdArgString(tempArg, sizeof(tempArg));
+        StripQuotes(tempArg);
         if(strcmp(tempArg, "@all", false) == 0)
         {
             b_TargetAll = true;
